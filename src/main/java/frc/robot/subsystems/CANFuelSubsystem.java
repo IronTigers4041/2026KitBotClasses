@@ -8,7 +8,13 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,15 +22,18 @@ import static frc.robot.Constants.FuelConstants.*;
 
 public class CANFuelSubsystem extends SubsystemBase {
   private final TalonFX feederRoller;
-  private final TalonFX intakeLauncherRoller;
-  private static TalonFXConfiguration funnelTalonConfiguration;
+  private static TalonFXConfiguration feederTalonConfiguration;
   private static CurrentLimitsConfigs currentLimitConfigs;
+
+  private SparkFlex intakeLauncherRoller;
+  private SparkMaxConfig m_motorConfig;
+  public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput;
 
   /** Creates a new CANBallSubsystem. */
   public CANFuelSubsystem() {
 
-    funnelTalonConfiguration = new TalonFXConfiguration();
-    currentLimitConfigs = funnelTalonConfiguration.CurrentLimits;
+    feederTalonConfiguration = new TalonFXConfiguration();
+    currentLimitConfigs = feederTalonConfiguration.CurrentLimits;
 
     currentLimitConfigs.SupplyCurrentLowerLimit = 5;
     currentLimitConfigs.SupplyCurrentLimit = 40;
@@ -33,14 +42,23 @@ public class CANFuelSubsystem extends SubsystemBase {
 
     currentLimitConfigs.StatorCurrentLimit = 80;
     currentLimitConfigs.StatorCurrentLimitEnable = false;
-    
+
+    feederTalonConfiguration.CurrentLimits = currentLimitConfigs;
+
     feederRoller = new TalonFX(FEEDER_MOTOR_ID);
-    feederRoller.getConfigurator().apply(funnelTalonConfiguration);
+    feederRoller.getConfigurator().apply(feederTalonConfiguration);
     feederRoller.setNeutralMode(NeutralModeValue.Coast);
 
-    intakeLauncherRoller = new TalonFX(INTAKE_LAUNCHER_MOTOR_ID);
-    intakeLauncherRoller.getConfigurator().apply(funnelTalonConfiguration);
-    intakeLauncherRoller.setNeutralMode(NeutralModeValue.Coast);
+    intakeLauncherRoller = new SparkFlex(INTAKE_LAUNCHER_MOTOR_ID, MotorType.kBrushless);
+    m_motorConfig = new SparkMaxConfig();
+
+    m_motorConfig = new SparkMaxConfig();
+    m_motorConfig.voltageCompensation(12);
+    m_motorConfig.smartCurrentLimit(100,120,20);
+    m_motorConfig.inverted(true);
+    m_motorConfig.idleMode(IdleMode.kCoast);
+    intakeLauncherRoller.configure(m_motorConfig, ResetMode.kNoResetSafeParameters, PersistMode.kNoPersistParameters);
+
 
     // put default values for various fuel operations onto the dashboard
     // all commands using this subsystem pull values from the dashbaord to allow
