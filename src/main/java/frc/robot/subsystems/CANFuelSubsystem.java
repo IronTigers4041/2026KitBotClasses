@@ -4,31 +4,41 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.hardware.TalonFX;
+import static frc.robot.Constants.FuelConstants.BOTTOM_FEEDER_MOTOR_ID;
+import static frc.robot.Constants.FuelConstants.FEEDER_MOTOR_ID;
+import static frc.robot.Constants.FuelConstants.INTAKE_LAUNCHER_MOTOR_ID;
+import static frc.robot.Constants.FuelConstants.INTAKING_FEEDER_VOLTAGE;
+import static frc.robot.Constants.FuelConstants.INTAKING_INTAKE_VOLTAGE;
+import static frc.robot.Constants.FuelConstants.LAUNCHING_FEEDER_VOLTAGE;
+import static frc.robot.Constants.FuelConstants.LAUNCHING_LAUNCHER_VOLTAGE;
+import static frc.robot.Constants.FuelConstants.SPIN_UP_FEEDER_VOLTAGE;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import static frc.robot.Constants.FuelConstants.*;
 
 public class CANFuelSubsystem extends SubsystemBase {
   private final TalonFX feederRoller;
+  private final TalonFX bottom_feederRoller;
   private static TalonFXConfiguration feederTalonConfiguration;
   private static CurrentLimitsConfigs currentLimitConfigs;
+  private static TalonFXConfiguration bottom_feederTalonConfiguration;
+  private static CurrentLimitsConfigs bottom_currentLimitConfigs;
 
   private SparkFlex intakeLauncherRoller;
   private SparkMaxConfig m_motorConfig;
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput;
-
+  private SparkFlex bottom_intakeLauncherRoller;
   /** Creates a new CANBallSubsystem. */
   public CANFuelSubsystem() {
 
@@ -45,14 +55,30 @@ public class CANFuelSubsystem extends SubsystemBase {
 
     feederTalonConfiguration.CurrentLimits = currentLimitConfigs;
 
+     bottom_feederTalonConfiguration = new TalonFXConfiguration();
+    bottom_currentLimitConfigs = bottom_feederTalonConfiguration.CurrentLimits;
+
+    bottom_currentLimitConfigs.SupplyCurrentLowerLimit = 5;
+    bottom_currentLimitConfigs.SupplyCurrentLimit = 40;
+    bottom_currentLimitConfigs.SupplyCurrentLowerTime = 1.0;
+    bottom_currentLimitConfigs.SupplyCurrentLimitEnable = false;
+
+    bottom_currentLimitConfigs.StatorCurrentLimit = 80;
+    bottom_currentLimitConfigs.StatorCurrentLimitEnable = false;
+
+    feederTalonConfiguration.CurrentLimits = currentLimitConfigs;
+
     feederRoller = new TalonFX(FEEDER_MOTOR_ID);
     feederRoller.getConfigurator().apply(feederTalonConfiguration);
     feederRoller.setNeutralMode(NeutralModeValue.Coast);
+    bottom_feederRoller = new TalonFX(BOTTOM_FEEDER_MOTOR_ID);
+    bottom_feederRoller.getConfigurator().apply(feederTalonConfiguration);
+    bottom_feederRoller.setNeutralMode(NeutralModeValue.Coast);
 
     intakeLauncherRoller = new SparkFlex(INTAKE_LAUNCHER_MOTOR_ID, MotorType.kBrushless);
     m_motorConfig = new SparkMaxConfig();
 
-    m_motorConfig = new SparkMaxConfig();
+   m_motorConfig = new SparkMaxConfig();
     m_motorConfig.voltageCompensation(12);
     m_motorConfig.smartCurrentLimit(100,120,20);
     m_motorConfig.inverted(true);
@@ -74,16 +100,19 @@ public class CANFuelSubsystem extends SubsystemBase {
   // A method to set the voltage of the intake roller
   public void setIntakeLauncherRoller(double voltage) {
     intakeLauncherRoller.setVoltage(voltage);
+    bottom_feederRoller.set(voltage);
   }
 
   // A method to set the voltage of the intake roller
   public void setFeederRoller(double voltage) {
     feederRoller.setVoltage(voltage);
+    bottom_feederRoller.setVoltage(voltage);
   }
 
   // A method to stop the rollers
   public void stop() {
     feederRoller.set(0);
+    bottom_feederRoller.set(0);
     intakeLauncherRoller.set(0);
   }
 
