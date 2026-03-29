@@ -24,7 +24,7 @@ public class SpinUp extends Command {
   // appropriate values for intaking
   @Override
   public void initialize() {
-    fuelSubsystem.setIntakeLauncherRoller(SmartDashboard.getNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE));
+    fuelSubsystem.setLauncher(SmartDashboard.getNumber("Launching launcher roller value", LAUNCHING_LAUNCHER_VOLTAGE));
     //fuelSubsystem.setFeederRoller(SmartDashboard.getNumber("Launching spin-up feeder value", SPIN_UP_FEEDER_VOLTAGE));
   }
 

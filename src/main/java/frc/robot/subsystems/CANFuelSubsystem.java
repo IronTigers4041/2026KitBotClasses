@@ -38,7 +38,7 @@ public class CANFuelSubsystem extends SubsystemBase {
   private SparkFlex intakeLauncherRoller;
   private SparkMaxConfig m_motorConfig;
   public double kP, kI, kD, kIz, kFF, kMaxOutput, kMinOutput;
-  private SparkFlex bottom_intakeLauncherRoller;
+
   /** Creates a new CANBallSubsystem. */
   public CANFuelSubsystem() {
 
@@ -70,7 +70,7 @@ public class CANFuelSubsystem extends SubsystemBase {
 
     feederRoller = new TalonFX(FEEDER_MOTOR_ID);
     feederRoller.getConfigurator().apply(feederTalonConfiguration);
-    feederRoller.setNeutralMode(NeutralModeValue.Coast);
+    feederRoller.setNeutralMode(NeutralModeValue.Brake);
     bottom_feederRoller = new TalonFX(BOTTOM_FEEDER_MOTOR_ID);
     bottom_feederRoller.getConfigurator().apply(feederTalonConfiguration);
     bottom_feederRoller.setNeutralMode(NeutralModeValue.Coast);
@@ -97,23 +97,25 @@ public class CANFuelSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Spin-up feeder roller value", SPIN_UP_FEEDER_VOLTAGE);
   }
 
-  // A method to set the voltage of the intake roller
-  public void setIntakeLauncherRoller(double voltage) {
+  public void setLauncher(double voltage) {
     intakeLauncherRoller.setVoltage(voltage);
-    bottom_feederRoller.set(voltage);
   }
 
   // A method to set the voltage of the intake roller
+  public void setIntakeRoller(double voltage) {
+    bottom_feederRoller.setVoltage(voltage);
+  }
+
+  // A method to set the voltage of the feeder roller
   public void setFeederRoller(double voltage) {
     feederRoller.setVoltage(voltage);
-    bottom_feederRoller.setVoltage(voltage);
   }
 
   // A method to stop the rollers
   public void stop() {
-    feederRoller.set(0);
-    bottom_feederRoller.set(0);
-    intakeLauncherRoller.set(0);
+    feederRoller.stopMotor();
+    bottom_feederRoller.stopMotor();
+    intakeLauncherRoller.stopMotor();
   }
 
   @Override
