@@ -16,6 +16,7 @@ import static frc.robot.Constants.FuelConstants.SPIN_UP_FEEDER_VOLTAGE;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -72,6 +73,8 @@ public class CANFuelSubsystem extends SubsystemBase {
     feederRoller.getConfigurator().apply(feederTalonConfiguration);
     feederRoller.setNeutralMode(NeutralModeValue.Brake);
     bottom_feederRoller = new TalonFX(BOTTOM_FEEDER_MOTOR_ID);
+
+    feederTalonConfiguration.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     bottom_feederRoller.getConfigurator().apply(feederTalonConfiguration);
     bottom_feederRoller.setNeutralMode(NeutralModeValue.Coast);
 
