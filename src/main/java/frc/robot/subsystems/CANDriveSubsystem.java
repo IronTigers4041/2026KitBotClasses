@@ -50,7 +50,7 @@ public class CANDriveSubsystem extends SubsystemBase {
     config.smartCurrentLimit(DRIVE_MOTOR_CURRENT_LIMIT);
 
     // Set configuration to follow each leader and then apply it to corresponding
-    // follower. Resetting in case a new controller is swapped
+    // follower. Resetting in case a new +controller is swapped
     // in and persisting in case of a controller reset due to breaker trip
     config.follow(leftLeader);
     leftFollower.configure(config, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
